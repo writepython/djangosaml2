@@ -204,7 +204,7 @@ def login(request,
             http_response = render(request, post_binding_form_template, {
                 'target_url': location,
                 'params': {
-                    'SAMLRequest': base64.b64encode(request_xml),
+                    'SAMLRequest': base64.b64encode(binary_type(request_xml)),
                     'RelayState': came_from,
                     },
                 })
