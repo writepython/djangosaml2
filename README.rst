@@ -250,7 +250,7 @@ We will see a typical configuration for protecting a Django project::
   Please check the `PySAML2 documentation`_ for more information about
   these and other configuration options.
 
-.. _`PySAML2 documentation`: http://packages.python.org/pysaml2/
+.. _`PySAML2 documentation`: http://pysaml2.readthedocs.io/en/latest/
 
 There are several external files and directories you have to create according
 to this configuration.
@@ -404,7 +404,7 @@ settings.py::
 
 Learn more about Django profile models at:
 
-https://docs.djangoproject.com/en/dev/topics/auth/#storing-additional-information-about-users
+https://docs.djangoproject.com/en/dev/topics/auth/customizing/#substituting-a-custom-user-model
 
 
 Sometimes you need to use special logic to update the user object
