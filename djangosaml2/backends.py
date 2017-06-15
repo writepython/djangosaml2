@@ -230,27 +230,23 @@ class Saml2Backend(ModelBackend):
         user_modified = False
         profile_modified = False
         for saml_attr, django_attrs in attribute_mapping.items():
-            try:
-                for attr in django_attrs:
-                    if hasattr(user, attr):
-                        user_attr = getattr(user, attr)
-                        if callable(user_attr):
-                            modified = user_attr(
-                                    attributes[saml_attr])
-                        else:
-                            modified = self._set_attribute(
-                                    user, attr, attributes[saml_attr][0])
+            attr_value_list = attributes.get(saml_attr)
+            if not attr_value_list:
+                continue
 
-                        user_modified = user_modified or modified
+            for attr in django_attrs:
+                if hasattr(user, attr):
+                    user_attr = getattr(user, attr)
+                    if callable(user_attr):
+                        modified = user_attr(attr_value_list)
+                    else:
+                        modified = self._set_attribute(user, attr, attr_value_list[0])
 
-                    elif profile is not None and hasattr(profile, attr):
-                        modified = self._set_attribute(
-                            profile, attr, attributes[saml_attr][0])
-                        profile_modified = profile_modified or modified
+                    user_modified = user_modified or modified
 
-            except KeyError:
-                # the saml attribute is missing
-                pass
+                elif profile is not None and hasattr(profile, attr):
+                    modified = self._set_attribute(profile, attr, attr_value_list[0])
+                    profile_modified = profile_modified or modified
 
         logger.debug('Sending the pre_save signal')
         signal_modified = any(
