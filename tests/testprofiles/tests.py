@@ -89,3 +89,25 @@ class Saml2BackendTests(TestCase):
         self.assertEquals(user.email, 'john@example.com')
         self.assertEquals(user.first_name, 'John')
         self.assertEquals(user.last_name, 'Doe')
+
+    def test_update_user_empty_attribute(self):
+        user = User.objects.create(username='john', last_name='Smith')
+
+        backend = Saml2Backend()
+        attribute_mapping = {
+            'uid': ('username', ),
+            'mail': ('email', ),
+            'cn': ('first_name', ),
+            'sn': ('last_name', ),
+            }
+        attributes = {
+            'uid': ('john', ),
+            'mail': ('john@example.com', ),
+            'cn': ('John', ),
+            'sn': (),
+            }
+        backend.update_user(user, attributes, attribute_mapping)
+        self.assertEquals(user.email, 'john@example.com')
+        self.assertEquals(user.first_name, 'John')
+        # empty attribute list: no update
+        self.assertEquals(user.last_name, 'Smith') 
