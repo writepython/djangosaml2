@@ -180,8 +180,29 @@ def login(request,
         else:
             http_response = HttpResponseRedirect(get_location(result))
     elif binding == BINDING_HTTP_POST:
-        # use the html provided by pysaml2 if no template specified
-        if not post_binding_form_template:
+        if post_binding_form_template:
+            # get request XML to build our own html based on the template
+            try:
+                location = client.sso_location(selected_idp, binding)
+            except TypeError as e:
+                logger.error('Unable to know which IdP to use')
+                return HttpResponse(text_type(e))
+            session_id, request_xml = client.create_authn_request(
+                location,
+                binding=binding)
+            try:
+                http_response = render(request, post_binding_form_template, {
+                    'target_url': location,
+                    'params': {
+                        'SAMLRequest': base64.b64encode(binary_type(request_xml)),
+                        'RelayState': came_from,
+                        },
+                    })
+            except TemplateDoesNotExist:
+                pass
+
+        if not http_response:
+            # use the html provided by pysaml2 if no template was specified or it didn't exist
             try:
                 session_id, result = client.prepare_for_authenticate(
                     entityid=selected_idp, relay_state=came_from,
@@ -191,23 +212,6 @@ def login(request,
                 return HttpResponse(text_type(e))
             else:
                 http_response = HttpResponse(result['data'])
-        # get request XML to build our own html based on the template
-        else:
-            try:
-                location = client.sso_location(selected_idp, binding)
-            except TypeError as e:
-                logger.error('Unable to know which IdP to use')
-                return HttpResponse(text_type(e))
-            session_id, request_xml = client.create_authn_request(
-                location,
-                binding=binding)
-            http_response = render(request, post_binding_form_template, {
-                'target_url': location,
-                'params': {
-                    'SAMLRequest': base64.b64encode(binary_type(request_xml)),
-                    'RelayState': came_from,
-                    },
-                })
     else:
         raise UnsupportedBinding('Unsupported binding: %s', binding)
 
