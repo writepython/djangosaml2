@@ -39,7 +39,7 @@ class DjangoSessionCacheAdapter(dict):
         # https://docs.djangoproject.com/en/1.9/topics/http/sessions/#when-sessions-are-saved
 
         #add objects to session
-        self._set_objects(self)
+        self._set_objects(dict(self))
         #invalidate session
         self.session.modified = True
 
