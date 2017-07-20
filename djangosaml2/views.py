@@ -49,7 +49,7 @@ from saml2.ident import code, decode
 from saml2.sigver import MissingKey
 from saml2.s_utils import UnsupportedBinding
 from saml2.response import StatusError
-from saml2.xmldsig import SIG_RSA_SHA1  # support for this is required by spec
+from saml2.xmldsig import SIG_RSA_SHA1, SIG_RSA_SHA256  # support for SHA1 is required by spec
 
 from djangosaml2.cache import IdentityCache, OutstandingQueriesCache
 from djangosaml2.cache import StateCache
@@ -168,9 +168,11 @@ def login(request,
     logger.debug('Redirecting user to the IdP via %s binding.', binding)
     if binding == BINDING_HTTP_REDIRECT:
         try:
-            # do not sign the xml itself, instead us the sigalg to
+            # do not sign the xml itself, instead use the sigalg to
             # generate the signature as a URL param
-            sigalg = SIG_RSA_SHA1 if sign_requests else None
+            sig_alg = getattr(conf, '_sp_authn_requests_signed_alg', False)
+            sigalg = SIG_RSA_SHA1 if sign_requests and sig_alg == 'sha1' else None
+            sigalg = SIG_RSA_SHA256 if sign_requests and sig_alg == 'sha256' else None
             session_id, result = client.prepare_for_authenticate(
                 entityid=selected_idp, relay_state=came_from,
                 binding=binding, sign=False, sigalg=sigalg)
