@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from saml2.s_utils import UnknownSystemEntity
 
 
@@ -46,7 +47,10 @@ def get_idp_sso_supported_bindings(idp_entity_id=None, config=None):
     # if idp is None, assume only one exists so just use that
     if idp_entity_id is None:
         # .keys() returns dict_keys in python3.5+
-        idp_entity_id = list(available_idps(config).keys()).pop()
+        try:
+            idp_entity_id = list(available_idps(config).keys())[0]
+        except IndexError:
+            raise ImproperlyConfigured("No IdP configured!")
     try:
         return meta.service(idp_entity_id, 'idpsso_descriptor', 'single_sign_on_service').keys()
     except UnknownSystemEntity:
