@@ -49,6 +49,7 @@ from saml2.ident import code, decode
 from saml2.sigver import MissingKey
 from saml2.s_utils import UnsupportedBinding
 from saml2.response import StatusError
+from saml2.validate import ResponseLifetimeExceed, ToEarly
 from saml2.xmldsig import SIG_RSA_SHA1, SIG_RSA_SHA256  # support for SHA1 is required by spec
 
 from djangosaml2.cache import IdentityCache, OutstandingQueriesCache
@@ -258,7 +259,8 @@ def assertion_consumer_service(request,
     try:
         response = client.parse_authn_request_response(xmlstr, BINDING_HTTP_POST,
                                                        outstanding_queries)
-    except StatusError:
+    except (StatusError, ResponseLifetimeExceed, ToEarly):
+        logger.exception('Error processing SAML Assertion')
         return render(request, 'djangosaml2/login_error.html', status=403)
 
     except MissingKey:
