@@ -25,7 +25,7 @@ from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import logout as django_logout
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, SuspiciousOperation
 from django.http import Http404, HttpResponse
 from django.http import HttpResponseRedirect  # 30x
 from django.http import  HttpResponseBadRequest, HttpResponseForbidden  # 40x
@@ -43,7 +43,7 @@ from saml2.metadata import entity_descriptor
 from saml2.ident import code, decode
 from saml2.sigver import MissingKey
 from saml2.s_utils import UnsupportedBinding
-from saml2.response import StatusError
+from saml2.response import StatusError, StatusAuthnFailed, SignatureError, StatusRequestDenied
 from saml2.validate import ResponseLifetimeExceed, ToEarly
 from saml2.xmldsig import SIG_RSA_SHA1, SIG_RSA_SHA256  # support for SHA1 is required by spec
 
@@ -51,7 +51,7 @@ from djangosaml2.cache import IdentityCache, OutstandingQueriesCache
 from djangosaml2.cache import StateCache
 from djangosaml2.conf import get_config
 from djangosaml2.signals import post_authenticated
-from djangosaml2.utils import get_custom_setting, available_idps, get_location, get_idp_sso_supported_bindings
+from djangosaml2.utils import fail_acs_response, get_custom_setting, available_idps, get_location, get_idp_sso_supported_bindings
 
 
 logger = logging.getLogger('djangosaml2')
@@ -235,38 +235,44 @@ def assertion_consumer_service(request,
     djangosaml2.backends.Saml2Backend that should be
     enabled in the settings.py
     """
-    attribute_mapping = attribute_mapping or get_custom_setting(
-            'SAML_ATTRIBUTE_MAPPING', {'uid': ('username', )})
-    create_unknown_user = create_unknown_user or get_custom_setting(
-            'SAML_CREATE_UNKNOWN_USER', True)
-    logger.debug('Assertion Consumer Service started')
-
+    attribute_mapping = attribute_mapping or get_custom_setting('SAML_ATTRIBUTE_MAPPING', {'uid': ('username', )})
+    create_unknown_user = create_unknown_user or get_custom_setting('SAML_CREATE_UNKNOWN_USER', True)
     conf = get_config(config_loader_path, request)
-    if 'SAMLResponse' not in request.POST:
-        return HttpResponseBadRequest(
-            'Couldn\'t find "SAMLResponse" in POST data.')
-    xmlstr = request.POST['SAMLResponse']
+    try:
+        xmlstr = request.POST['SAMLResponse']
+    except KeyError:
+        logger.warning('Missing "SAMLResponse" parameter in POST data.')
+        raise SuspiciousOperation
+
     client = Saml2Client(conf, identity_cache=IdentityCache(request.session))
 
     oq_cache = OutstandingQueriesCache(request.session)
     outstanding_queries = oq_cache.outstanding_queries()
 
     try:
-        response = client.parse_authn_request_response(xmlstr, BINDING_HTTP_POST,
-                                                       outstanding_queries)
-    except (StatusError, ResponseLifetimeExceed, ToEarly):
-        logger.exception('Error processing SAML Assertion')
-        return render(request, 'djangosaml2/login_error.html', status=403)
-
+        response = client.parse_authn_request_response(xmlstr, BINDING_HTTP_POST, outstanding_queries)
+    except (StatusError, ToEarly):
+        logger.exception("Error processing SAML Assertion.")
+        return fail_acs_response(request)
+    except ResponseLifetimeExceed:
+        logger.info("SAML Assertion is no longer valid. Possibly caused by network delay or replay attack.", exc_info=True)
+        return fail_acs_response(request)
+    except SignatureError:
+        logger.info("Invalid or malformed SAML Assertion.", exc_info=True)
+        return fail_acs_response(request)
+    except StatusAuthnFailed:
+        logger.info("Authentication denied for user by IdP.", exc_info=True)
+        return fail_acs_response(request)
+    except StatusRequestDenied:
+        logger.warning("Authentication interrupted at IdP.", exc_info=True)
+        return fail_acs_response(request)
     except MissingKey:
-        logger.error('MissingKey error in ACS')
-        return HttpResponseForbidden(
-            "The Identity Provider is not configured correctly: "
-            "the certificate key is missing")
+        logger.exception("SAML Identity Provider is not configured correctly: certificate key is missing!")
+        return fail_acs_response(request)
+
     if response is None:
-        logger.error('SAML response is None')
-        return HttpResponseBadRequest(
-            "SAML response has errors. Please check the logs")
+        logger.warning("Invalid SAML Assertion received (unknown error).")
+        return fail_acs_response(request, status=400, exc_class=SuspiciousOperation)
 
     session_id = response.session_id()
     oq_cache.delete(session_id)
@@ -279,17 +285,18 @@ def assertion_consumer_service(request,
     if callable(create_unknown_user):
         create_unknown_user = create_unknown_user()
 
-    logger.debug('Trying to authenticate the user')
+    logger.debug('Trying to authenticate the user. Session info: %s', session_info)
     user = auth.authenticate(request=request,
                              session_info=session_info,
                              attribute_mapping=attribute_mapping,
                              create_unknown_user=create_unknown_user)
     if user is None:
-        logger.error('The user is None')
+        logger.warning("Could not authenticate user received in SAML Assertion. Session info: %s", session_info)
         raise PermissionDenied
 
     auth.login(request, user)
     _set_subject_id(request.session, session_info['name_id'])
+    logger.debug("User %s authenticated via SSO.", user)
 
     logger.debug('Sending the post_authenticated signal')
     post_authenticated.send_robust(sender=user, session_info=session_info)

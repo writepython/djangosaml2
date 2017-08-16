@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from importlib import import_module
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from saml2.s_utils import UnknownSystemEntity
@@ -66,3 +67,16 @@ def get_location(http_info):
     header_name, header_value = headers[0]
     assert header_name == 'Location'
     return header_value
+
+
+def fail_acs_response(request, *args, **kwargs):
+    """ Serves as a common mechanism for ending ACS in case of any SAML related failure.
+    Handling can be configured by setting the SAML_ACS_FAILURE_RESPONSE_FUNCTION as
+    suitable for the project.
+
+    The default behavior uses SAML specific template that is rendered on any ACS error,
+    but this can be simply changed so that PermissionDenied exception is raised instead.
+    """
+    failure_function = import_module(get_custom_setting('SAML_ACS_FAILURE_RESPONSE_FUNCTION',
+                                                        'djangosaml2.acs_failures.template_failure'))
+    return failure_function(request, *args, **kwargs)
