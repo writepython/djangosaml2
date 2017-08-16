@@ -14,13 +14,10 @@
 # limitations under the License.
 
 import copy
+from importlib import import_module
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-try:
-    from importlib import import_module
-except ImportError:
-    from django.utils.importlib import import_module
 
 from saml2.config import SPConfig
 
