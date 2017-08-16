@@ -302,7 +302,7 @@ def assertion_consumer_service(request,
         logger.warning('The RelayState parameter exists but is empty')
         relay_state = default_relay_state
     if not is_safe_url(url=relay_state, host=request.get_host()):
-        came_from = settings.LOGIN_REDIRECT_URL
+        relay_state = settings.LOGIN_REDIRECT_URL
     logger.debug('Redirecting to the RelayState: %s', relay_state)
     return HttpResponseRedirect(relay_state)
 
