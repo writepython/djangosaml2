@@ -35,12 +35,7 @@ from django.shortcuts import render
 from django.template import TemplateDoesNotExist
 from django.utils.http import is_safe_url
 from django.utils.six import text_type, binary_type
-try:
-    from django.views.decorators.csrf import csrf_exempt
-except ImportError:
-    # Django 1.0 compatibility
-    def csrf_exempt(view_func):
-        return view_func
+from django.views.decorators.csrf import csrf_exempt
 
 from saml2 import BINDING_HTTP_REDIRECT, BINDING_HTTP_POST
 from saml2.client import Saml2Client
