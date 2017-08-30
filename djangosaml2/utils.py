@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from importlib import import_module
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+from django.utils.module_loading import import_string
 from saml2.s_utils import UnknownSystemEntity
 
 
@@ -77,6 +77,6 @@ def fail_acs_response(request, *args, **kwargs):
     The default behavior uses SAML specific template that is rendered on any ACS error,
     but this can be simply changed so that PermissionDenied exception is raised instead.
     """
-    failure_function = import_module(get_custom_setting('SAML_ACS_FAILURE_RESPONSE_FUNCTION',
+    failure_function = import_string(get_custom_setting('SAML_ACS_FAILURE_RESPONSE_FUNCTION',
                                                         'djangosaml2.acs_failures.template_failure'))
     return failure_function(request, *args, **kwargs)
