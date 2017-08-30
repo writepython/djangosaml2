@@ -263,7 +263,7 @@ class SAML2Tests(TestCase):
 
         url = urlparse(location)
         # as the RelayState is empty we have redirect to LOGIN_REDIRECT_URL
-        self.assertEquals(url.path, '/accounts/profile/')
+        self.assertEquals(url.path, settings.LOGIN_REDIRECT_URL)
         self.assertEquals(force_text(new_user.id), self.client.session[SESSION_KEY])
 
     def test_missing_param_to_assertion_consumer_service_request(self):
