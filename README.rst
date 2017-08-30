@@ -33,13 +33,13 @@ will also install PySAML2 and its dependencies automatically.
 Configuration
 =============
 
-There are three things you need to setup to make djangosaml2 works in your
+There are three things you need to setup to make djangosaml2 work in your
 Django project:
 
 1. **settings.py** as you may already know, it is the main Django
    configuration file.
 2. **urls.py** is the file where you will include djangosaml2 urls.
-3. **pysaml2** specific files such as a attribute map directory and a
+3. **pysaml2** specific files such as an attribute map directory and a
    certificate.
 
 
@@ -69,7 +69,7 @@ do to make sure it is compatible with your Django version and environment.
   as you run any other Django application test suite. Just type
   ``python manage.py test djangosaml2``
 
-Then you have to add the djangosaml2.backends.Saml2Backend
+Then you have to add the ``djangosaml2.backends.Saml2Backend``
 authentication backend to the list of authentications backends.
 By default only the ModelBackend included in Django is configured.
 A typical configuration would look like this::
@@ -89,7 +89,7 @@ A typical configuration would look like this::
   djangosaml2 0.5.0 it is now possible to define such
   backends.
 
-Finally we have to tell Django what is the new login url we want to use::
+Finally we have to tell Django what the new login url we want to use is::
 
   LOGIN_URL = '/saml2/login/'
   SESSION_EXPIRE_AT_BROWSER_CLOSE = True
@@ -114,7 +114,7 @@ view to the ``/saml2/login/`` view.
 Changes in the urls.py file
 ---------------------------
 
-The next thing you need to do is to include ``djangosaml2.urls`` module to your
+The next thing you need to do is to include ``djangosaml2.urls`` module in your
 main ``urls.py`` module::
 
   urlpatterns = patterns(
@@ -269,9 +269,10 @@ metadata for remote entities. Usually the easiest type is the ``local`` where
 you just put the name of a local XML file with the contents of the remote
 entities metadata. This XML file should be in the SAML2 metadata format.
 
-The ``key_file`` and ``cert_file`` options references the two parts of a
-standard x509 certificate. You need it to sign your metadata an to encrypt
-and decrypt the SAML2 assertions.
+The ``key_file`` and ``cert_file`` options reference the two parts of a
+standard x509 certificate. You need it to sign your metadata. For assertion
+encryption/decryption support please configure another set of ``key_file`` and
+``cert_file``, but as inner attribues of ``encryption_keypairs`` option.
 
 .. note::
 
@@ -308,13 +309,13 @@ When such assertion is received on the Django side it is used to find
 a Django user and create a session for it. By default djangosaml2 will
 do a query on the User model with the 'username' attribute but you can
 change it to any other attribute of the User model. For example,
-you can do this look up using the 'email' attribute. In order to do so
+you can do this lookup using the 'email' attribute. In order to do so
 you should set the following setting::
 
   SAML_DJANGO_USER_MAIN_ATTRIBUTE = 'email'
 
 Please, use an unique attribute when setting this option. Otherwise
-the authentication process will fail because djangosaml2 does not know
+the authentication process may fail because djangosaml2 will not know
 which Django user it should pick.
 
 If your main attribute is something inherently case-inensitive (such as
