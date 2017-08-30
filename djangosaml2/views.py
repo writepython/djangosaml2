@@ -349,7 +349,7 @@ def logout(request, config_loader_path=None):
     subject_id = _get_subject_id(request.session)
     if subject_id is None:
         logger.warning(
-            'The session does not contains the subject id for user %s',
+            'The session does not contain the subject id for user %s',
             request.user)
 
     result = client.global_logout(subject_id)
