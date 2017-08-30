@@ -341,7 +341,6 @@ def logout(request, config_loader_path=None):
     This view initiates the SAML2 Logout request
     using the pysaml2 library to create the LogoutRequest.
     """
-    logger.debug('Logout process started')
     state = StateCache(request.session)
     conf = get_config(config_loader_path, request)
 
