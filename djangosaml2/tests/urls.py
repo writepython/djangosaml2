@@ -12,24 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-try:
-    from django.conf.urls import patterns, include, url
-# Fallback for Django versions < 1.4
-except ImportError:
-    from django.conf.urls.defaults import patterns, include, url
-
+from django.conf.urls import patterns, include, url
 from django.contrib import admin
-admin.autodiscover()
+
+from djangosaml2 import views
 
 
-urlpatterns = patterns(
-    'djangosaml2.views',
-    url(r'^login/$', 'login', name='saml2_login'),
-    url(r'^acs/$', 'assertion_consumer_service', name='saml2_acs'),
-    url(r'^logout/$', 'logout', name='saml2_logout'),
-    url(r'^ls/$', 'logout_service', name='saml2_ls'),
-    url(r'^ls/post/$', 'logout_service_post', name='saml2_ls_post'),
-    url(r'^metadata/$', 'metadata', name='saml2_metadata'),
+urlpatterns = patterns(''
+    url(r'^login/$', views.login, name='saml2_login'),
+    url(r'^acs/$', views.assertion_consumer_service, name='saml2_acs'),
+    url(r'^logout/$', views.logout, name='saml2_logout'),
+    url(r'^ls/$', views.logout_service, name='saml2_ls'),
+    url(r'^ls/post/$', views.logout_service_post, name='saml2_ls_post'),
+    url(r'^metadata/$', views.metadata, name='saml2_metadata'),
 
     # this is needed for the tests
     url(r'^admin/', include(admin.site.urls)),
