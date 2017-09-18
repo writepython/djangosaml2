@@ -109,12 +109,8 @@ def login(request,
     # SAML_IGNORE_AUTHENTICATED_USERS_ON_LOGIN setting. If that setting
     # is True (default value) we will redirect him to the came_from view.
     # Otherwise, we will show an (configurable) authorization error.
-    if not request.user.is_anonymous():
-        try:
-            redirect_authenticated_user = settings.SAML_IGNORE_AUTHENTICATED_USERS_ON_LOGIN
-        except AttributeError:
-            redirect_authenticated_user = True
-
+    if request.user.is_authenticated:
+        redirect_authenticated_user = getattr(settings, 'SAML_IGNORE_AUTHENTICATED_USERS_ON_LOGIN', True)
         if redirect_authenticated_user:
             return HttpResponseRedirect(came_from)
         else:
