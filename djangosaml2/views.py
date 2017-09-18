@@ -236,7 +236,8 @@ def assertion_consumer_service(request,
     enabled in the settings.py
     """
     attribute_mapping = attribute_mapping or get_custom_setting('SAML_ATTRIBUTE_MAPPING', {'uid': ('username', )})
-    create_unknown_user = create_unknown_user or get_custom_setting('SAML_CREATE_UNKNOWN_USER', True)
+    create_unknown_user = create_unknown_user if create_unknown_user is not None else \
+                          get_custom_setting('SAML_CREATE_UNKNOWN_USER', True)
     conf = get_config(config_loader_path, request)
     try:
         xmlstr = request.POST['SAMLResponse']
