@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 from django.contrib import admin
 
 from djangosaml2 import views
 
 
-urlpatterns = patterns(''
+urlpatterns = [
     url(r'^login/$', views.login, name='saml2_login'),
     url(r'^acs/$', views.assertion_consumer_service, name='saml2_acs'),
     url(r'^logout/$', views.logout, name='saml2_logout'),
@@ -28,4 +28,4 @@ urlpatterns = patterns(''
 
     # this is needed for the tests
     url(r'^admin/', include(admin.site.urls)),
-)
+]
