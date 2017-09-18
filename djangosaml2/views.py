@@ -68,6 +68,16 @@ def _get_subject_id(session):
         return None
 
 
+def callable_bool(value):
+    """ A compatibility wrapper for pre Django 1.10 User model API that used
+    is_authenticated() and is_anonymous() methods instead of attributes
+    """
+    if callable(value):
+        return value()
+    else:
+        return value
+
+
 def login(request,
           config_loader_path=None,
           wayf_template='djangosaml2/wayf.html',
@@ -109,7 +119,7 @@ def login(request,
     # SAML_IGNORE_AUTHENTICATED_USERS_ON_LOGIN setting. If that setting
     # is True (default value) we will redirect him to the came_from view.
     # Otherwise, we will show an (configurable) authorization error.
-    if request.user.is_authenticated:
+    if callable_bool(request.user.is_authenticated):
         redirect_authenticated_user = getattr(settings, 'SAML_IGNORE_AUTHENTICATED_USERS_ON_LOGIN', True)
         if redirect_authenticated_user:
             return HttpResponseRedirect(came_from)
