@@ -38,7 +38,6 @@ from django.utils.six import text_type, binary_type
 from django.views.decorators.csrf import csrf_exempt
 
 from saml2 import BINDING_HTTP_REDIRECT, BINDING_HTTP_POST
-from saml2.client import Saml2Client
 from saml2.metadata import entity_descriptor
 from saml2.ident import code, decode
 from saml2.sigver import MissingKey
@@ -50,6 +49,7 @@ from saml2.xmldsig import SIG_RSA_SHA1, SIG_RSA_SHA256  # support for SHA1 is re
 from djangosaml2.cache import IdentityCache, OutstandingQueriesCache
 from djangosaml2.cache import StateCache
 from djangosaml2.conf import get_config
+from djangosaml2.overrides import Saml2Client
 from djangosaml2.signals import post_authenticated
 from djangosaml2.utils import fail_acs_response, get_custom_setting, available_idps, get_location, get_idp_sso_supported_bindings
 

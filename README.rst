@@ -110,6 +110,16 @@ If you want to allow several authentication mechanisms in your project
 you should set the LOGIN_URL option to another view and put a link in such
 view to the ``/saml2/login/`` view.
 
+Preferred Logout binding
+-----------------
+Use the following setting to choose your preferred binding for SP initiated logout requests::
+
+  SAML_LOGOUT_REQUEST_PREFERRED_BINDING
+
+For example::
+
+  import saml2
+  SAML_LOGOUT_REQUEST_PREFERRED_BINDING = saml2.BINDING_HTTP_POST
 
 Changes in the urls.py file
 ---------------------------
