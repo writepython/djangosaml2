@@ -188,7 +188,7 @@ class Saml2Backend(ModelBackend):
             user = User.objects.get(**user_query_args)
             user = self.update_user(user, attributes, attribute_mapping)
         except User.DoesNotExist:
-            logger.error('The user "%s" does not exist', main_attribute)
+            logger.error('The user "%s" does not exist, searched %s', main_attribute, django_user_main_attribute)
             return None
         except MultipleObjectsReturned:
             logger.error("There are more than one user with %s = %s",
