@@ -432,7 +432,7 @@ def do_logout_service(request, data, binding, config_loader_path=None, next_page
                 'The session does not contain the subject id for user %s. Performing local logout',
                 request.user)
             auth.logout(request)
-            return render(request, logout_error_template, {})
+            return render(request, logout_error_template, status=403)
         else:
             http_info = client.handle_logout_request(
                 data['SAMLRequest'],
