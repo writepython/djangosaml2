@@ -60,13 +60,11 @@ def get_idp_sso_supported_bindings(idp_entity_id=None, config=None):
 
 def get_location(http_info):
     """Extract the redirect URL from a pysaml2 http_info object"""
-    assert 'headers' in http_info
-    headers = http_info['headers']
-
-    assert len(headers) == 1
-    header_name, header_value = headers[0]
-    assert header_name == 'Location'
-    return header_value
+    try:
+        headers = dict(http_info['headers'])
+        return headers['Location']
+    except KeyError:
+        return http_info['url']
 
 
 def fail_acs_response(request, *args, **kwargs):
