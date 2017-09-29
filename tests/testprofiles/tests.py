@@ -117,6 +117,11 @@ class Saml2BackendTests(TestCase):
     def test_django_user_main_attribute(self):
         backend = Saml2Backend()
 
+        old_username_field = User.USERNAME_FIELD
+        User.USERNAME_FIELD = 'slug'
+        self.assertEquals(backend.get_django_user_main_attribute(), 'slug')
+        User.USERNAME_FIELD = old_username_field
+
         with override_settings(AUTH_USER_MODEL='auth.User'):
             self.assertEquals(
                 DjangoUserModel.USERNAME_FIELD,

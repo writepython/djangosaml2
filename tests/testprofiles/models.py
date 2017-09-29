@@ -27,7 +27,6 @@ else:
     from django.contrib.auth.models import AbstractUser
     class TestUser(AbstractUser):
         age = models.CharField(max_length=100, blank=True)
-
         def process_first_name(self, first_name):
             self.first_name = first_name[0]
 

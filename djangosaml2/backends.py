@@ -136,7 +136,9 @@ class Saml2Backend(ModelBackend):
 
     def get_django_user_main_attribute(self):
         return getattr(
-            settings, 'SAML_DJANGO_USER_MAIN_ATTRIBUTE', 'username')
+            settings,
+            'SAML_DJANGO_USER_MAIN_ATTRIBUTE',
+            getattr(get_saml_user_model(), 'USERNAME_FIELD', 'username'))
 
     def get_django_user_main_attribute_lookup(self):
         return getattr(settings, 'SAML_DJANGO_USER_MAIN_ATTRIBUTE_LOOKUP', '')
