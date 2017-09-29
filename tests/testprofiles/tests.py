@@ -23,7 +23,9 @@ except ImportError:
 else:
     User = get_user_model()
 
-from django.test import TestCase
+from django.contrib.auth.models import User as DjangoUserModel
+
+from django.test import TestCase, override_settings
 
 from djangosaml2.backends import Saml2Backend
 
@@ -110,4 +112,32 @@ class Saml2BackendTests(TestCase):
         self.assertEquals(user.email, 'john@example.com')
         self.assertEquals(user.first_name, 'John')
         # empty attribute list: no update
-        self.assertEquals(user.last_name, 'Smith') 
+        self.assertEquals(user.last_name, 'Smith')
+
+    def test_django_user_main_attribute(self):
+        backend = Saml2Backend()
+
+        with override_settings(AUTH_USER_MODEL='auth.User'):
+            self.assertEquals(
+                DjangoUserModel.USERNAME_FIELD,
+                backend.get_django_user_main_attribute())
+
+        with override_settings(
+                AUTH_USER_MODEL='testprofiles.StandaloneUserModel'):
+            self.assertEquals(
+                backend.get_django_user_main_attribute(),
+                'username')
+
+        with override_settings(SAML_DJANGO_USER_MAIN_ATTRIBUTE='foo'):
+            self.assertEquals(backend.get_django_user_main_attribute(), 'foo')
+
+    def test_django_user_main_attribute_lookup(self):
+        backend = Saml2Backend()
+
+        self.assertEquals(backend.get_django_user_main_attribute_lookup(), '')
+
+        with override_settings(
+                SAML_DJANGO_USER_MAIN_ATTRIBUTE_LOOKUP='__iexact'):
+            self.assertEquals(
+                backend.get_django_user_main_attribute_lookup(),
+                '__iexact')

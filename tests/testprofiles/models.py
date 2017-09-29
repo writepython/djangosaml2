@@ -15,8 +15,6 @@
 
 import django
 from django.db import models
-from django.contrib.auth.models import User
-from django.conf import settings
 
 if django.VERSION < (1, 7):
     class TestProfile(models.Model):
@@ -32,3 +30,10 @@ else:
 
         def process_first_name(self, first_name):
             self.first_name = first_name[0]
+
+    class StandaloneUserModel(models.Model):
+        """
+        Does not inherit from Django's base abstract user and does not define a
+        USERNAME_FIELD.
+        """
+        username = models.CharField(max_length=30, unique=True)

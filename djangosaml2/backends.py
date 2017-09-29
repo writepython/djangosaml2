@@ -23,8 +23,6 @@ from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned, 
 
 from djangosaml2.signals import pre_user_save
 
-from . import settings as saml_settings
-
 try:
     from django.contrib.auth.models import SiteProfileNotAvailable
 except ImportError:
@@ -85,8 +83,7 @@ class Saml2Backend(ModelBackend):
         use_name_id_as_username = getattr(
             settings, 'SAML_USE_NAME_ID_AS_USERNAME', False)
 
-        django_user_main_attribute = saml_settings.SAML_DJANGO_USER_MAIN_ATTRIBUTE
-        django_user_main_attribute_lookup = saml_settings.SAML_DJANGO_USER_MAIN_ATTRIBUTE_LOOKUP
+        django_user_main_attribute = self.get_django_user_main_attribute()
 
         logger.debug('attributes: %s', attributes)
         saml_user = None
@@ -137,15 +134,17 @@ class Saml2Backend(ModelBackend):
         """
         return main_attribute
 
-    def get_user_query_args(self, main_attribute):
-        django_user_main_attribute = getattr(
+    def get_django_user_main_attribute(self):
+        return getattr(
             settings, 'SAML_DJANGO_USER_MAIN_ATTRIBUTE', 'username')
-        django_user_main_attribute_lookup = getattr(
-            settings, 'SAML_DJANGO_USER_MAIN_ATTRIBUTE_LOOKUP', '')
 
-        return {
-            django_user_main_attribute + django_user_main_attribute_lookup: main_attribute
-        }
+    def get_django_user_main_attribute_lookup(self):
+        return getattr(settings, 'SAML_DJANGO_USER_MAIN_ATTRIBUTE_LOOKUP', '')
+
+    def get_user_query_args(self, main_attribute):
+        lookup = (self.get_django_user_main_attribute() +
+                  self.get_django_user_main_attribute_lookup())
+        return {lookup: main_attribute}
 
     def get_saml2_user(self, create, main_attribute, attributes, attribute_mapping):
         if create:
@@ -156,8 +155,7 @@ class Saml2Backend(ModelBackend):
     def _get_or_create_saml2_user(self, main_attribute, attributes, attribute_mapping):
         logger.debug('Check if the user "%s" exists or create otherwise',
                      main_attribute)
-        django_user_main_attribute = saml_settings.SAML_DJANGO_USER_MAIN_ATTRIBUTE
-        django_user_main_attribute_lookup = saml_settings.SAML_DJANGO_USER_MAIN_ATTRIBUTE_LOOKUP
+        django_user_main_attribute = self.get_django_user_main_attribute()
         user_query_args = self.get_user_query_args(main_attribute)
         user_create_defaults = {django_user_main_attribute: main_attribute}
 
@@ -180,7 +178,7 @@ class Saml2Backend(ModelBackend):
 
     def _get_saml2_user(self, main_attribute, attributes, attribute_mapping):
         User = get_saml_user_model()
-        django_user_main_attribute = saml_settings.SAML_DJANGO_USER_MAIN_ATTRIBUTE
+        django_user_main_attribute = self.get_django_user_main_attribute()
         user_query_args = self.get_user_query_args(main_attribute)
 
         logger.debug('Retrieving existing user "%s"', main_attribute)
