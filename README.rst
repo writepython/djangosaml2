@@ -226,7 +226,7 @@ We will see a typical configuration for protecting a Django project::
     # Signing
     'key_file': path.join(BASEDIR, 'mycert.key'),  # private part
     'cert_file': path.join(BASEDIR, 'mycert.pem'),  # public part
-    
+
     # Encryption
     'encryption_keypairs': [{
         'key_file': path.join(BASEDIR, 'my_encryption_key.key'),  # private part
@@ -282,7 +282,7 @@ entities metadata. This XML file should be in the SAML2 metadata format.
 The ``key_file`` and ``cert_file`` options reference the two parts of a
 standard x509 certificate. You need it to sign your metadata. For assertion
 encryption/decryption support please configure another set of ``key_file`` and
-``cert_file``, but as inner attribues of ``encryption_keypairs`` option.
+``cert_file``, but as inner attributes of ``encryption_keypairs`` option.
 
 .. note::
 
@@ -310,7 +310,7 @@ User attributes
 ---------------
 
 In the SAML 2.0 authentication process the Identity Provider (IdP) will
-send a security assertion to the Service Provider (SP) upon a succesful
+send a security assertion to the Service Provider (SP) upon a successful
 authentication. This assertion contains attributes about the user that
 was authenticated. It depends on the IdP configuration what exact
 attributes are sent to each SP it can talk to.
@@ -328,7 +328,7 @@ Please, use an unique attribute when setting this option. Otherwise
 the authentication process may fail because djangosaml2 will not know
 which Django user it should pick.
 
-If your main attribute is something inherently case-inensitive (such as
+If your main attribute is something inherently case-insensitive (such as
 an email address), you may set::
 
   SAML_DJANGO_USER_MAIN_ATTRIBUTE_LOOKUP = '__iexact'
@@ -376,7 +376,7 @@ If you are using Django user profile objects to store extra attributes
 about your user you can add those attributes to the SAML_ATTRIBUTE_MAPPING
 dictionary. For each (key, value) pair, djangosaml2 will try to store the
 attribute in the User model if there is a matching field in that model.
-Otherwise it will try to do the same with your profile custom model. For 
+Otherwise it will try to do the same with your profile custom model. For
 multi-valued attributes only the first value is assigned to the destination field.
 
 Alternatively, custom processing of attributes can be achieved by setting the
@@ -403,7 +403,7 @@ Custom User object::
   class User(AbstractUser):
 
     def process_groups(self, groups):
-      // process list of group names in argument 'groups' 
+      // process list of group names in argument 'groups'
       pass;
 
 settings.py::
