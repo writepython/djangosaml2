@@ -431,7 +431,7 @@ class SAML2Tests(TestCase):
         response = self.client.get(reverse('saml2_ls'), {
                 'SAMLRequest': deflate_and_base64_encode(saml_request),
                 })
-        self.assertContains(response, 'Logout error', status_code=200)
+        self.assertContains(response, 'Logout error', status_code=403)
 
     def test_finish_logout_renders_error_template(self):
         request = RequestFactory().get('/bar/foo')
