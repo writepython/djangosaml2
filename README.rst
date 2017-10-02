@@ -315,14 +315,15 @@ authentication. This assertion contains attributes about the user that
 was authenticated. It depends on the IdP configuration what exact
 attributes are sent to each SP it can talk to.
 
-When such assertion is received on the Django side it is used to find
-a Django user and create a session for it. By default djangosaml2 will
-do a query on the User model with the 'username' attribute but you can
-change it to any other attribute of the User model. For example,
-you can do this lookup using the 'email' attribute. In order to do so
-you should set the following setting::
+When such assertion is received on the Django side it is used to find a Django
+user and create a session for it. By default djangosaml2 will do a query on the
+User model with the USERNAME_FIELD_ attribute but you can change it to any
+other attribute of the User model. For example, you can do this lookup using
+the 'email' attribute. In order to do so you should set the following setting::
 
   SAML_DJANGO_USER_MAIN_ATTRIBUTE = 'email'
+
+.. _USERNAME_FIELD: https://docs.djangoproject.com/en/dev/topics/auth/customizing/#django.contrib.auth.models.CustomUser.USERNAME_FIELD
 
 Please, use an unique attribute when setting this option. Otherwise
 the authentication process may fail because djangosaml2 will not know
