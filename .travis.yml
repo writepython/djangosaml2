@@ -24,10 +24,11 @@ addons:
     - xmlsec1
 
 install:
-    - pip install --upgrade pip setuptools tox virtualenv
+    - pip install --upgrade pip setuptools tox virtualenv rstcheck
 
 script:
     - tox -e $TOX_ENV
+    - rstcheck README.rst
 
 after_success:
     - pip install codecov
