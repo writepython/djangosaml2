@@ -1,5 +1,10 @@
 Changes
 =======
+0.16.10 (2017-10-02)
+-------------------
+- Bugfixes and internal refactorings.
+- Added support for custom USERNAME_FIELD on custom User models. Many thanks to francoisfreitag.
+
 0.16.9 (2017-09-19)
 -------------------
 - Bugfixes and minor improvements. Thanks to goetzk and AmbientLighter.
