@@ -3,6 +3,7 @@ Changes
 
 UNRELEASED
 ----------
+- Log when fields are missing in a SAML response.
 - Log when attribute_mapping maps to nonexistent User fields.
 - Dropped compatibility for Python < 2.7 and Django < 1.8.
 

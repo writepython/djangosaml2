@@ -102,11 +102,17 @@ class Saml2BackendTests(TestCase):
             'cn': ('John', ),
             'sn': (),
             }
-        backend.update_user(user, attributes, attribute_mapping)
+        with self.assertLogs('djangosaml2', level='DEBUG') as logs:
+            backend.update_user(user, attributes, attribute_mapping)
         self.assertEqual(user.email, 'john@example.com')
         self.assertEqual(user.first_name, 'John')
         # empty attribute list: no update
         self.assertEqual(user.last_name, 'Smith')
+        self.assertIn(
+            'DEBUG:djangosaml2:Could not find value for "sn", not '
+            'updating fields "(\'last_name\',)"',
+            logs.output,
+        )
 
     def test_invalid_model_attribute_log(self):
         backend = Saml2Backend()

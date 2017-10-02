@@ -215,6 +215,9 @@ class Saml2Backend(ModelBackend):
         for saml_attr, django_attrs in attribute_mapping.items():
             attr_value_list = attributes.get(saml_attr)
             if not attr_value_list:
+                logger.debug(
+                    'Could not find value for "%s", not updating fields "%s"',
+                    saml_attr, django_attrs)
                 continue
 
             for attr in django_attrs:
