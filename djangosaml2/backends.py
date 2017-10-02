@@ -226,6 +226,9 @@ class Saml2Backend(ModelBackend):
                         modified = self._set_attribute(user, attr, attr_value_list[0])
 
                     user_modified = user_modified or modified
+                else:
+                    logger.debug(
+                        'Could not find attribute "%s" on user "%s"', attr, user)
 
         logger.debug('Sending the pre_save signal')
         signal_modified = any(

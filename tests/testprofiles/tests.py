@@ -108,6 +108,26 @@ class Saml2BackendTests(TestCase):
         # empty attribute list: no update
         self.assertEqual(user.last_name, 'Smith')
 
+    def test_invalid_model_attribute_log(self):
+        backend = Saml2Backend()
+
+        attribute_mapping = {
+            'uid': ['username'],
+            'cn': ['nonexistent'],
+        }
+        attributes = {
+            'uid': ['john'],
+            'cn': ['John'],
+        }
+
+        with self.assertLogs('djangosaml2', level='DEBUG') as logs:
+            backend.get_saml2_user(True, 'john', attributes, attribute_mapping)
+
+        self.assertIn(
+            'DEBUG:djangosaml2:Could not find attribute "nonexistent" on user "john"',
+            logs.output,
+        )
+
     def test_django_user_main_attribute(self):
         backend = Saml2Backend()
 
