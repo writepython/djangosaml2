@@ -24,11 +24,17 @@ from django.conf import settings
 from django.contrib.auth import SESSION_KEY, get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.sessions.middleware import SessionMiddleware
-from django.core.urlresolvers import reverse
+try:
+    from django.urls import reverse
+except ImportError:
+    from django.core.urlresolvers import reverse
 from django.template import Template, Context
 from django.test import TestCase
 from django.test.client import RequestFactory
-from django.utils.text import force_text
+try:
+    from django.utils.encoding import force_text
+except ImportError:
+    from django.utils.text import force_text
 from django.utils.six.moves.urllib.parse import urlparse, parse_qs
 
 from saml2.config import SPConfig
