@@ -14,23 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import django
-
-try:
-    from django.contrib.auth import get_user_model
-except ImportError:
-    from django.contrib.auth.models import User
-else:
-    User = get_user_model()
-
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User as DjangoUserModel
-
 from django.test import TestCase, override_settings
 
 from djangosaml2.backends import Saml2Backend
 
-if django.VERSION < (1,7):
-    from testprofiles.models import TestProfile
+User = get_user_model()
 
 
 class Saml2BackendTests(TestCase):
@@ -57,19 +47,10 @@ class Saml2BackendTests(TestCase):
         self.assertEqual(user.first_name, 'John')
         self.assertEqual(user.last_name, 'Doe')
 
-        # now we create a user profile and link it to the user
-        if django.VERSION < (1, 7):
-            profile = TestProfile.objects.create(user=user)
-            self.assertNotEquals(profile, None)
-
         attribute_mapping['saml_age'] = ('age', )
         attributes['saml_age'] = ('22', )
         backend.update_user(user, attributes, attribute_mapping)
-
-        if django.VERSION < (1, 7):
-            self.assertEqual(user.get_profile().age, '22')
-        else:
-            self.assertEqual(user.age, '22')
+        self.assertEqual(user.age, '22')
 
     def test_update_user_callable_attributes(self):
         user = User.objects.create(username='john')

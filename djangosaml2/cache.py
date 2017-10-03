@@ -14,7 +14,6 @@
 # limitations under the License.
 
 from saml2.cache import Cache
-from saml2.ident import code, decode
 
 
 class DjangoSessionCacheAdapter(dict):

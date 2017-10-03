@@ -119,11 +119,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 
-AUTH_PROFILE_MODULE = 'testprofiles.TestProfile'
-
-import django
-if django.VERSION >= (1, 7):
-    AUTH_USER_MODEL = 'testprofiles.TestUser'
+AUTH_USER_MODEL = 'testprofiles.TestUser'
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to

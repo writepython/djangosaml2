@@ -18,16 +18,11 @@ import logging
 from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth.backends import ModelBackend
-from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned, \
-    ImproperlyConfigured
+from django.core.exceptions import (
+    MultipleObjectsReturned, ImproperlyConfigured,
+)
 
 from djangosaml2.signals import pre_user_save
-
-try:
-    from django.contrib.auth.models import SiteProfileNotAvailable
-except ImportError:
-    class SiteProfileNotAvailable(Exception):
-        pass
 
 
 logger = logging.getLogger('djangosaml2')
@@ -211,24 +206,12 @@ class Saml2Backend(ModelBackend):
 
         By default it uses a mapping defined in the settings constant
         SAML_ATTRIBUTE_MAPPING. For each attribute, if the user object has
-        that field defined it will be set, otherwise it will try to set
-        it in the profile object.
+        that field defined it will be set.
         """
         if not attribute_mapping:
             return user
 
-        try:
-            profile = user.get_profile()
-        except ObjectDoesNotExist:
-            profile = None
-        except SiteProfileNotAvailable:
-            profile = None
-        # Django 1.5 custom model assumed
-        except AttributeError:
-            profile = user
-
         user_modified = False
-        profile_modified = False
         for saml_attr, django_attrs in attribute_mapping.items():
             attr_value_list = attributes.get(saml_attr)
             if not attr_value_list:
@@ -244,10 +227,6 @@ class Saml2Backend(ModelBackend):
 
                     user_modified = user_modified or modified
 
-                elif profile is not None and hasattr(profile, attr):
-                    modified = self._set_attribute(profile, attr, attr_value_list[0])
-                    profile_modified = profile_modified or modified
-
         logger.debug('Sending the pre_save signal')
         signal_modified = any(
             [response for receiver, response
@@ -259,10 +238,6 @@ class Saml2Backend(ModelBackend):
 
         if user_modified or signal_modified or force_save:
             user.save()
-
-        if (profile is not None
-            and (profile_modified or signal_modified or force_save)):
-            profile.save()
 
         return user
 
