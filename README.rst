@@ -69,6 +69,9 @@ do to make sure it is compatible with your Django version and environment.
   you run any other Django application test suite. Just type ``python manage.py
   test djangosaml2``.
 
+  Python 2 users need to ``pip install djangosaml2[test]`` in order to run the
+  tests.
+
 Then you have to add the ``djangosaml2.backends.Saml2Backend``
 authentication backend to the list of authentications backends.
 By default only the ModelBackend included in Django is configured.
