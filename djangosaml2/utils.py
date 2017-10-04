@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import django
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+from django.utils.http import is_safe_url
 from django.utils.module_loading import import_string
 from saml2.s_utils import UnknownSystemEntity
 
@@ -78,3 +80,11 @@ def fail_acs_response(request, *args, **kwargs):
     failure_function = import_string(get_custom_setting('SAML_ACS_FAILURE_RESPONSE_FUNCTION',
                                                         'djangosaml2.acs_failures.template_failure'))
     return failure_function(request, *args, **kwargs)
+
+
+def is_safe_url_compat(url, allowed_hosts=None, require_https=False):
+    if django.VERSION >= (1, 11):
+        return is_safe_url(url, allowed_hosts=allowed_hosts, require_https=require_https)
+    assert len(allowed_hosts) == 1
+    host = allowed_hosts.pop()
+    return is_safe_url(url, host=host)

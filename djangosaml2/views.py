@@ -24,16 +24,19 @@ except ImportError:
 from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.views import logout as django_logout
+try:
+    from django.contrib.auth.views import LogoutView
+    django_logout = LogoutView.as_view()
+except ImportError:
+    from django.contrib.auth.views import logout as django_logout
 from django.core.exceptions import PermissionDenied, SuspiciousOperation
 from django.http import Http404, HttpResponse
 from django.http import HttpResponseRedirect  # 30x
-from django.http import  HttpResponseBadRequest, HttpResponseForbidden  # 40x
+from django.http import HttpResponseBadRequest  # 40x
 from django.http import HttpResponseServerError  # 50x
 from django.views.decorators.http import require_POST
 from django.shortcuts import render
 from django.template import TemplateDoesNotExist
-from django.utils.http import is_safe_url
 from django.utils.six import text_type, binary_type
 from django.views.decorators.csrf import csrf_exempt
 
@@ -51,7 +54,10 @@ from djangosaml2.cache import StateCache
 from djangosaml2.conf import get_config
 from djangosaml2.overrides import Saml2Client
 from djangosaml2.signals import post_authenticated
-from djangosaml2.utils import fail_acs_response, get_custom_setting, available_idps, get_location, get_idp_sso_supported_bindings
+from djangosaml2.utils import (
+    available_idps, fail_acs_response, get_custom_setting,
+    get_idp_sso_supported_bindings, get_location, is_safe_url_compat,
+)
 
 
 logger = logging.getLogger('djangosaml2')
@@ -106,7 +112,7 @@ def login(request,
         came_from = settings.LOGIN_REDIRECT_URL
 
     # Ensure the user-originating redirection url is safe.
-    if not is_safe_url(url=came_from, host=request.get_host()):
+    if not is_safe_url_compat(url=came_from, allowed_hosts={request.get_host()}):
         came_from = settings.LOGIN_REDIRECT_URL
 
     # if the user is already authenticated that maybe because of two reasons:
@@ -315,7 +321,7 @@ def assertion_consumer_service(request,
     if not relay_state:
         logger.warning('The RelayState parameter exists but is empty')
         relay_state = default_relay_state
-    if not is_safe_url(url=relay_state, host=request.get_host()):
+    if not is_safe_url_compat(url=relay_state, allowed_hosts={request.get_host()}):
         relay_state = settings.LOGIN_REDIRECT_URL
     logger.debug('Redirecting to the RelayState: %s', relay_state)
     return HttpResponseRedirect(relay_state)
@@ -451,7 +457,7 @@ def finish_logout(request, response, next_page=None):
     if response and response.status_ok():
         if next_page is None and hasattr(settings, 'LOGOUT_REDIRECT_URL'):
             next_page = settings.LOGOUT_REDIRECT_URL
-        logger.debug('Performing django_logout with a next_page of %s',
+        logger.debug('Performing django logout with a next_page of %s',
                      next_page)
         return django_logout(request, next_page=next_page)
     else:
