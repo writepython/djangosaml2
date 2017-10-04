@@ -84,8 +84,8 @@ class SAML2Tests(TestCase):
 
             return xml_string
 
-        self.assertEquals(remove_variable_attributes(real_xml),
-                          remove_variable_attributes(expected_xmls))
+        self.assertEqual(remove_variable_attributes(real_xml),
+                         remove_variable_attributes(expected_xmls))
 
     def init_cookies(self):
         self.client.cookies[settings.SESSION_COOKIE_NAME] = 'testing'
@@ -119,7 +119,7 @@ class SAML2Tests(TestCase):
         url = urlparse(response['Location'])
         params = parse_qs(url.query)
 
-        self.assertEquals(params['RelayState'], [settings.LOGIN_REDIRECT_URL, ])
+        self.assertEqual(params['RelayState'], [settings.LOGIN_REDIRECT_URL, ])
 
     def test_login_one_idp(self):
         # monkey patch SAML configuration
@@ -130,12 +130,12 @@ class SAML2Tests(TestCase):
         )
 
         response = self.client.get(reverse('saml2_login'))
-        self.assertEquals(response.status_code, 302)
+        self.assertEqual(response.status_code, 302)
         location = response['Location']
 
         url = urlparse(location)
-        self.assertEquals(url.hostname, 'idp.example.com')
-        self.assertEquals(url.path, '/simplesaml/saml2/idp/SSOService.php')
+        self.assertEqual(url.hostname, 'idp.example.com')
+        self.assertEqual(url.path, '/simplesaml/saml2/idp/SSOService.php')
 
         params = parse_qs(url.query)
         self.assert_('SAMLRequest' in params)
@@ -159,17 +159,17 @@ class SAML2Tests(TestCase):
         # in the RelayState argument
         next = '/another-view/'
         response = self.client.get(reverse('saml2_login'), {'next': next})
-        self.assertEquals(response.status_code, 302)
+        self.assertEqual(response.status_code, 302)
         location = response['Location']
 
         url = urlparse(location)
-        self.assertEquals(url.hostname, 'idp.example.com')
-        self.assertEquals(url.path, '/simplesaml/saml2/idp/SSOService.php')
+        self.assertEqual(url.hostname, 'idp.example.com')
+        self.assertEqual(url.path, '/simplesaml/saml2/idp/SSOService.php')
 
         params = parse_qs(url.query)
         self.assert_('SAMLRequest' in params)
         self.assert_('RelayState' in params)
-        self.assertEquals(params['RelayState'][0], next)
+        self.assertEqual(params['RelayState'][0], next)
 
     def test_login_several_idps(self):
         settings.SAML_CONFIG = conf.create_conf(
@@ -191,12 +191,12 @@ class SAML2Tests(TestCase):
                 'idp': 'https://idp2.example.com/simplesaml/saml2/idp/metadata.php',
                 'next': '/',
                 })
-        self.assertEquals(response.status_code, 302)
+        self.assertEqual(response.status_code, 302)
         location = response['Location']
 
         url = urlparse(location)
-        self.assertEquals(url.hostname, 'idp2.example.com')
-        self.assertEquals(url.path, '/simplesaml/saml2/idp/SSOService.php')
+        self.assertEqual(url.hostname, 'idp2.example.com')
+        self.assertEqual(url.path, '/simplesaml/saml2/idp/SSOService.php')
 
         params = parse_qs(url.query)
         self.assert_('SAMLRequest' in params)
@@ -237,15 +237,15 @@ class SAML2Tests(TestCase):
                 'SAMLResponse': self.b64_for_post(saml_response),
                 'RelayState': came_from,
                 })
-        self.assertEquals(response.status_code, 302)
+        self.assertEqual(response.status_code, 302)
         location = response['Location']
         url = urlparse(location)
-        self.assertEquals(url.path, came_from)
+        self.assertEqual(url.path, came_from)
 
-        self.assertEquals(User.objects.count(), initial_user_count + 1)
+        self.assertEqual(User.objects.count(), initial_user_count + 1)
         user_id = self.client.session[SESSION_KEY]
         user = User.objects.get(id=user_id)
-        self.assertEquals(user.username, 'student')
+        self.assertEqual(user.username, 'student')
 
         # let's create another user and log in with that one
         new_user = User.objects.create(username='teacher', password='not-used')
@@ -258,13 +258,13 @@ class SAML2Tests(TestCase):
                 'SAMLResponse': self.b64_for_post(saml_response),
                 'RelayState': came_from,
                 })
-        self.assertEquals(response.status_code, 302)
+        self.assertEqual(response.status_code, 302)
         location = response['Location']
 
         url = urlparse(location)
         # as the RelayState is empty we have redirect to LOGIN_REDIRECT_URL
-        self.assertEquals(url.path, settings.LOGIN_REDIRECT_URL)
-        self.assertEquals(force_text(new_user.id), self.client.session[SESSION_KEY])
+        self.assertEqual(url.path, settings.LOGIN_REDIRECT_URL)
+        self.assertEqual(force_text(new_user.id), self.client.session[SESSION_KEY])
 
     def test_missing_param_to_assertion_consumer_service_request(self):
         # Send request without SAML2Response parameter
@@ -293,7 +293,7 @@ class SAML2Tests(TestCase):
                 'SAMLResponse': self.b64_for_post(saml_response),
                 'RelayState': came_from,
                 })
-        self.assertEquals(response.status_code, 302)
+        self.assertEqual(response.status_code, 302)
 
     @skip("This is a known issue caused by pysaml2. Needs more investigation. Fixes are welcome.")
     def test_logout(self):
@@ -305,13 +305,13 @@ class SAML2Tests(TestCase):
         self.do_login()
 
         response = self.client.get(reverse('saml2_logout'))
-        self.assertEquals(response.status_code, 302)
+        self.assertEqual(response.status_code, 302)
         location = response['Location']
 
         url = urlparse(location)
-        self.assertEquals(url.hostname, 'idp.example.com')
-        self.assertEquals(url.path,
-                          '/simplesaml/saml2/idp/SingleLogoutService.php')
+        self.assertEqual(url.hostname, 'idp.example.com')
+        self.assertEqual(url.path,
+                         '/simplesaml/saml2/idp/SingleLogoutService.php')
 
         params = parse_qs(url.query)
         self.assert_('SAMLRequest' in params)
@@ -339,13 +339,13 @@ class SAML2Tests(TestCase):
         self.do_login()
 
         response = self.client.get(reverse('saml2_logout'))
-        self.assertEquals(response.status_code, 302)
+        self.assertEqual(response.status_code, 302)
         location = response['Location']
 
         url = urlparse(location)
-        self.assertEquals(url.hostname, 'idp.example.com')
-        self.assertEquals(url.path,
-                          '/simplesaml/saml2/idp/SingleLogoutService.php')
+        self.assertEqual(url.hostname, 'idp.example.com')
+        self.assertEqual(url.path,
+                         '/simplesaml/saml2/idp/SingleLogoutService.php')
 
         params = parse_qs(url.query)
         self.assert_('SAMLRequest' in params)
@@ -374,7 +374,7 @@ class SAML2Tests(TestCase):
                 'SAMLResponse': deflate_and_base64_encode(saml_response),
                 })
         self.assertContains(response, "Logged out", status_code=200)
-        self.assertEquals(self.client.session.keys(), [])
+        self.assertEqual(self.client.session.keys(), [])
 
     def test_logout_service_global(self):
         settings.SAML_CONFIG = conf.create_conf(
@@ -394,13 +394,13 @@ class SAML2Tests(TestCase):
         response = self.client.get(reverse('saml2_ls'), {
                 'SAMLRequest': deflate_and_base64_encode(saml_request),
                 })
-        self.assertEquals(response.status_code, 302)
+        self.assertEqual(response.status_code, 302)
         location = response['Location']
 
         url = urlparse(location)
-        self.assertEquals(url.hostname, 'idp.example.com')
-        self.assertEquals(url.path,
-                          '/simplesaml/saml2/idp/SingleLogoutService.php')
+        self.assertEqual(url.hostname, 'idp.example.com')
+        self.assertEqual(url.path,
+                         '/simplesaml/saml2/idp/SingleLogoutService.php')
 
         params = parse_qs(url.query)
         self.assert_('SAMLResponse' in params)
@@ -513,14 +513,14 @@ ID4zT0FcZASGuthM56rRJJSx
         expected_metadata = expected_metadata % valid_until
 
         response = self.client.get('/metadata/')
-        self.assertEquals(response['Content-type'], 'text/xml; charset=utf8')
-        self.assertEquals(response.status_code, 200)
-        self.assertEquals(response.content, expected_metadata)
+        self.assertEqual(response['Content-type'], 'text/xml; charset=utf8')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, expected_metadata)
 
     def test_post_authenticated_signal(self):
 
         def signal_handler(signal, user, session_info):
-            self.assertEquals(isinstance(user, User), True)
+            self.assertEqual(isinstance(user, User), True)
 
         post_authenticated.connect(signal_handler, dispatch_uid='test_signal')
 
@@ -577,7 +577,7 @@ class ConfTests(TestCase):
         request = RequestFactory().get('/bar/foo')
         conf = get_config(config_loader_path, request)
 
-        self.assertEquals(conf.entityid, 'testentity')
+        self.assertEqual(conf.entityid, 'testentity')
 
     def test_custom_conf_loader_from_view(self):
         config_loader_path = 'djangosaml2.tests.test_config_loader_with_real_conf'
@@ -587,9 +587,9 @@ class ConfTests(TestCase):
         middleware.process_request(request)
         request.session.save()
         response = views.login(request, config_loader_path)
-        self.assertEquals(response.status_code, 302)
+        self.assertEqual(response.status_code, 302)
         location = response['Location']
 
         url = urlparse(location)
-        self.assertEquals(url.hostname, 'idp.example.com')
-        self.assertEquals(url.path, '/simplesaml/saml2/idp/SSOService.php')
+        self.assertEqual(url.hostname, 'idp.example.com')
+        self.assertEqual(url.path, '/simplesaml/saml2/idp/SSOService.php')

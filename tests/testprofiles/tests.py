@@ -53,9 +53,9 @@ class Saml2BackendTests(TestCase):
             'sn': ('Doe', ),
             }
         backend.update_user(user, attributes, attribute_mapping)
-        self.assertEquals(user.email, 'john@example.com')
-        self.assertEquals(user.first_name, 'John')
-        self.assertEquals(user.last_name, 'Doe')
+        self.assertEqual(user.email, 'john@example.com')
+        self.assertEqual(user.first_name, 'John')
+        self.assertEqual(user.last_name, 'Doe')
 
         # now we create a user profile and link it to the user
         if django.VERSION < (1, 7):
@@ -67,9 +67,9 @@ class Saml2BackendTests(TestCase):
         backend.update_user(user, attributes, attribute_mapping)
 
         if django.VERSION < (1, 7):
-            self.assertEquals(user.get_profile().age, '22')
+            self.assertEqual(user.get_profile().age, '22')
         else:
-            self.assertEquals(user.age, '22')
+            self.assertEqual(user.age, '22')
 
     def test_update_user_callable_attributes(self):
         user = User.objects.create(username='john')
@@ -88,9 +88,9 @@ class Saml2BackendTests(TestCase):
             'sn': ('Doe', ),
             }
         backend.update_user(user, attributes, attribute_mapping)
-        self.assertEquals(user.email, 'john@example.com')
-        self.assertEquals(user.first_name, 'John')
-        self.assertEquals(user.last_name, 'Doe')
+        self.assertEqual(user.email, 'john@example.com')
+        self.assertEqual(user.first_name, 'John')
+        self.assertEqual(user.last_name, 'Doe')
 
     def test_update_user_empty_attribute(self):
         user = User.objects.create(username='john', last_name='Smith')
@@ -109,40 +109,40 @@ class Saml2BackendTests(TestCase):
             'sn': (),
             }
         backend.update_user(user, attributes, attribute_mapping)
-        self.assertEquals(user.email, 'john@example.com')
-        self.assertEquals(user.first_name, 'John')
+        self.assertEqual(user.email, 'john@example.com')
+        self.assertEqual(user.first_name, 'John')
         # empty attribute list: no update
-        self.assertEquals(user.last_name, 'Smith')
+        self.assertEqual(user.last_name, 'Smith')
 
     def test_django_user_main_attribute(self):
         backend = Saml2Backend()
 
         old_username_field = User.USERNAME_FIELD
         User.USERNAME_FIELD = 'slug'
-        self.assertEquals(backend.get_django_user_main_attribute(), 'slug')
+        self.assertEqual(backend.get_django_user_main_attribute(), 'slug')
         User.USERNAME_FIELD = old_username_field
 
         with override_settings(AUTH_USER_MODEL='auth.User'):
-            self.assertEquals(
+            self.assertEqual(
                 DjangoUserModel.USERNAME_FIELD,
                 backend.get_django_user_main_attribute())
 
         with override_settings(
                 AUTH_USER_MODEL='testprofiles.StandaloneUserModel'):
-            self.assertEquals(
+            self.assertEqual(
                 backend.get_django_user_main_attribute(),
                 'username')
 
         with override_settings(SAML_DJANGO_USER_MAIN_ATTRIBUTE='foo'):
-            self.assertEquals(backend.get_django_user_main_attribute(), 'foo')
+            self.assertEqual(backend.get_django_user_main_attribute(), 'foo')
 
     def test_django_user_main_attribute_lookup(self):
         backend = Saml2Backend()
 
-        self.assertEquals(backend.get_django_user_main_attribute_lookup(), '')
+        self.assertEqual(backend.get_django_user_main_attribute_lookup(), '')
 
         with override_settings(
                 SAML_DJANGO_USER_MAIN_ATTRIBUTE_LOOKUP='__iexact'):
-            self.assertEquals(
+            self.assertEqual(
                 backend.get_django_user_main_attribute_lookup(),
                 '__iexact')
