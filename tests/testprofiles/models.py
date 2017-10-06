@@ -13,26 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import django
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-if django.VERSION < (1, 7):
-    class TestProfile(models.Model):
-        user = models.OneToOneField('auth.User')
-        age = models.CharField(max_length=100, blank=True)
 
-        def process_first_name(self, first_name):
-            self.first_name = first_name[0]
-else:
-    from django.contrib.auth.models import AbstractUser
-    class TestUser(AbstractUser):
-        age = models.CharField(max_length=100, blank=True)
-        def process_first_name(self, first_name):
-            self.first_name = first_name[0]
+class TestUser(AbstractUser):
+    age = models.CharField(max_length=100, blank=True)
 
-    class StandaloneUserModel(models.Model):
-        """
-        Does not inherit from Django's base abstract user and does not define a
-        USERNAME_FIELD.
-        """
-        username = models.CharField(max_length=30, unique=True)
+    def process_first_name(self, first_name):
+        self.first_name = first_name[0]
+
+
+class StandaloneUserModel(models.Model):
+    """
+    Does not inherit from Django's base abstract user and does not define a
+    USERNAME_FIELD.
+    """
+    username = models.CharField(max_length=30, unique=True)
