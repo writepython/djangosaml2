@@ -65,9 +65,9 @@ do to make sure it is compatible with your Django version and environment.
 
 .. note::
 
-  When you finish the configuation you can run the djangosaml2 test suite
-  as you run any other Django application test suite. Just type
-  ``python manage.py test djangosaml2``
+  When you finish the configuration you can run the djangosaml2 test suite as
+  you run any other Django application test suite. Just type ``python manage.py
+  test djangosaml2``.
 
 Then you have to add the ``djangosaml2.backends.Saml2Backend``
 authentication backend to the list of authentications backends.
