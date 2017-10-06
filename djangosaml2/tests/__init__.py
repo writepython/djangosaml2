@@ -360,7 +360,7 @@ class SAML2Tests(TestCase):
                 'SAMLResponse': deflate_and_base64_encode(saml_response),
                 })
         self.assertContains(response, "Logged out", status_code=200)
-        self.assertEqual(self.client.session.keys(), [])
+        self.assertListEqual(list(self.client.session.keys()), [])
 
     def test_logout_service_global(self):
         settings.SAML_CONFIG = conf.create_conf(
