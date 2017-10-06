@@ -137,8 +137,8 @@ class SAML2Tests(TestCase):
         self.assertEqual(url.path, '/simplesaml/saml2/idp/SSOService.php')
 
         params = parse_qs(url.query)
-        self.assert_('SAMLRequest' in params)
-        self.assert_('RelayState' in params)
+        self.assertIn('SAMLRequest', params)
+        self.assertIn('RelayState', params)
 
         saml_request = params['SAMLRequest'][0]
         if PY_VERSION < (3,):
@@ -163,8 +163,8 @@ class SAML2Tests(TestCase):
         self.assertEqual(url.path, '/simplesaml/saml2/idp/SSOService.php')
 
         params = parse_qs(url.query)
-        self.assert_('SAMLRequest' in params)
-        self.assert_('RelayState' in params)
+        self.assertIn('SAMLRequest', params)
+        self.assertIn('RelayState', params)
         self.assertEqual(params['RelayState'][0], next)
 
     def test_login_several_idps(self):
@@ -195,8 +195,8 @@ class SAML2Tests(TestCase):
         self.assertEqual(url.path, '/simplesaml/saml2/idp/SSOService.php')
 
         params = parse_qs(url.query)
-        self.assert_('SAMLRequest' in params)
-        self.assert_('RelayState' in params)
+        self.assertIn('SAMLRequest', params)
+        self.assertIn('RelayState', params)
 
         saml_request = params['SAMLRequest'][0]
         if PY_VERSION < (3,):
@@ -307,7 +307,7 @@ class SAML2Tests(TestCase):
                          '/simplesaml/saml2/idp/SingleLogoutService.php')
 
         params = parse_qs(url.query)
-        self.assert_('SAMLRequest' in params)
+        self.assertIn('SAMLRequest', params)
 
         saml_request = params['SAMLRequest'][0]
         if PY_VERSION < (3,):
@@ -338,7 +338,7 @@ class SAML2Tests(TestCase):
                          '/simplesaml/saml2/idp/SingleLogoutService.php')
 
         params = parse_qs(url.query)
-        self.assert_('SAMLRequest' in params)
+        self.assertIn('SAMLRequest', params)
 
         saml_request = params['SAMLRequest'][0]
         if PY_VERSION < (3,):
@@ -390,7 +390,7 @@ class SAML2Tests(TestCase):
                          '/simplesaml/saml2/idp/SingleLogoutService.php')
 
         params = parse_qs(url.query)
-        self.assert_('SAMLResponse' in params)
+        self.assertIn('SAMLResponse', params)
 
         saml_response = params['SAMLResponse'][0]
         if PY_VERSION < (3,):
