@@ -318,7 +318,6 @@ class SAML2Tests(TestCase):
         self.assertSAMLRequestsEquals(decode_base64_and_inflate(saml_request).decode('utf-8'),
                                       expected_request)
 
-    @skip("This is a known issue caused by pysaml2. Needs more investigation. Fixes are welcome.")
     def test_logout_service_local(self):
         settings.SAML_CONFIG = conf.create_conf(
             sp_host='sp.example.com',
