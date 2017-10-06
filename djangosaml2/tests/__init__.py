@@ -350,7 +350,7 @@ class SAML2Tests(TestCase):
                                       expected_request)
 
         # now simulate a logout response sent by the idp
-        request_id = re.findall(r' ID="(.*?)" ', xml)[0]
+        request_id = re.findall(r' ID="(.*?)" ', expected_request)[0]
         instant = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
 
         saml_response = """<?xml version='1.0' encoding='UTF-8'?>
