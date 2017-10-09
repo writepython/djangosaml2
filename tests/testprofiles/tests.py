@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import sys
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User as DjangoUserModel
 from django.test import TestCase, override_settings
@@ -21,6 +23,17 @@ from django.test import TestCase, override_settings
 from djangosaml2.backends import Saml2Backend
 
 User = get_user_model()
+
+if sys.version_info < (3, 4):
+    # Monkey-patch TestCase to add the assertLogs method introduced in
+    # Python 3.4
+    from unittest2.case import _AssertLogsContext
+
+    class LoggerTestCase(TestCase):
+        def assertLogs(self, logger=None, level=None):
+            return _AssertLogsContext(self, logger, level)
+
+    TestCase = LoggerTestCase
 
 
 class Saml2BackendTests(TestCase):
@@ -89,11 +102,37 @@ class Saml2BackendTests(TestCase):
             'cn': ('John', ),
             'sn': (),
             }
-        backend.update_user(user, attributes, attribute_mapping)
+        with self.assertLogs('djangosaml2', level='DEBUG') as logs:
+            backend.update_user(user, attributes, attribute_mapping)
         self.assertEqual(user.email, 'john@example.com')
         self.assertEqual(user.first_name, 'John')
         # empty attribute list: no update
         self.assertEqual(user.last_name, 'Smith')
+        self.assertIn(
+            'DEBUG:djangosaml2:Could not find value for "sn", not '
+            'updating fields "(\'last_name\',)"',
+            logs.output,
+        )
+
+    def test_invalid_model_attribute_log(self):
+        backend = Saml2Backend()
+
+        attribute_mapping = {
+            'uid': ['username'],
+            'cn': ['nonexistent'],
+        }
+        attributes = {
+            'uid': ['john'],
+            'cn': ['John'],
+        }
+
+        with self.assertLogs('djangosaml2', level='DEBUG') as logs:
+            backend.get_saml2_user(True, 'john', attributes, attribute_mapping)
+
+        self.assertIn(
+            'DEBUG:djangosaml2:Could not find attribute "nonexistent" on user "john"',
+            logs.output,
+        )
 
     def test_django_user_main_attribute(self):
         backend = Saml2Backend()

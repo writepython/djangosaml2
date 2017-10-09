@@ -215,6 +215,9 @@ class Saml2Backend(ModelBackend):
         for saml_attr, django_attrs in attribute_mapping.items():
             attr_value_list = attributes.get(saml_attr)
             if not attr_value_list:
+                logger.debug(
+                    'Could not find value for "%s", not updating fields "%s"',
+                    saml_attr, django_attrs)
                 continue
 
             for attr in django_attrs:
@@ -226,6 +229,9 @@ class Saml2Backend(ModelBackend):
                         modified = self._set_attribute(user, attr, attr_value_list[0])
 
                     user_modified = user_modified or modified
+                else:
+                    logger.debug(
+                        'Could not find attribute "%s" on user "%s"', attr, user)
 
         logger.debug('Sending the pre_save signal')
         signal_modified = any(

@@ -13,13 +13,20 @@
 # limitations under the License.
 
 
-import os
 import codecs
+import os
+import sys
 from setuptools import setup, find_packages
 
 
 def read(*rnames):
     return codecs.open(os.path.join(os.path.dirname(__file__), *rnames), encoding='utf-8').read()
+
+
+extra = {'test': []}
+if sys.version_info < (3, 4):
+    # Necessary to use assertLogs in tests
+    extra['test'].append('unittest2')
 
 
 setup(
@@ -66,4 +73,5 @@ setup(
         'Django>=1.8',
         'pysaml2==4.4.0',
         ],
+    extras_require=extra,
     )
