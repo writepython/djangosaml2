@@ -37,7 +37,7 @@ from django.http import HttpResponseServerError  # 50x
 from django.views.decorators.http import require_POST
 from django.shortcuts import render
 from django.template import TemplateDoesNotExist
-from django.utils.six import text_type, binary_type
+from django.utils.six import text_type, binary_type, PY3
 from django.views.decorators.csrf import csrf_exempt
 
 from saml2 import BINDING_HTTP_REDIRECT, BINDING_HTTP_POST
@@ -202,10 +202,15 @@ def login(request,
                 location,
                 binding=binding)
             try:
+                if PY3:
+                    saml_request = base64.b64encode(binary_type(request_xml, 'UTF-8'))
+                else:
+                    saml_request = base64.b64encode(binary_type(request_xml))
+
                 http_response = render(request, post_binding_form_template, {
                     'target_url': location,
                     'params': {
-                        'SAMLRequest': base64.b64encode(binary_type(request_xml, 'UTF-8')),
+                        'SAMLRequest': saml_request,
                         'RelayState': came_from,
                         },
                     })
