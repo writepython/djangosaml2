@@ -217,8 +217,6 @@ class SAML2Tests(TestCase):
             metadata_file='remote_metadata_one_idp.xml',
         )
 
-        self.init_cookies()
-
         # session_id should start with a letter since it is a NCName
         session_id = "a0123456789abcdef0123456789abcdef"
         came_from = '/another-view/'
