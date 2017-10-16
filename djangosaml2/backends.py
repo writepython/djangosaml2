@@ -71,7 +71,7 @@ class Saml2Backend(ModelBackend):
             logger.error('"ava" key not found in session_info')
             return None
 
-        attributes = session_info['ava']
+        attributes = self.clean_attributes(session_info['ava'])
         if not attributes:
             logger.error('The attributes dictionary is empty')
 
@@ -119,6 +119,10 @@ class Saml2Backend(ModelBackend):
         SAML attributes.
         """
         return True
+
+    def clean_attributes(self, attributes):
+        """Hook to clean attributes from the SAML response."""
+        return attributes
 
     def clean_user_main_attribute(self, main_attribute):
         """Performs any cleaning on the user main attribute (which

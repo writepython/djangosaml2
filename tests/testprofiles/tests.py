@@ -166,3 +166,33 @@ class Saml2BackendTests(TestCase):
             self.assertEqual(
                 backend.get_django_user_main_attribute_lookup(),
                 '__iexact')
+
+
+class LowerCaseSaml2Backend(Saml2Backend):
+    def clean_attributes(self, attributes):
+        return dict([k.lower(), v] for k, v in attributes.items())
+
+
+class LowerCaseSaml2BackendTest(TestCase):
+    def test_update_user_clean_attributes(self):
+        user = User.objects.create(username='john')
+        attribute_mapping = {
+            'uid': ('username', ),
+            'mail': ('email', ),
+            'cn': ('first_name', ),
+            'sn': ('last_name', ),
+            }
+        attributes = {
+            'UID': ['john'],
+            'MAIL': ['john@example.com'],
+            'CN': ['John'],
+            'SN': [],
+        }
+
+        backend = LowerCaseSaml2Backend()
+        user = backend.authenticate(
+            None,
+            session_info={'ava': attributes},
+            attribute_mapping=attribute_mapping,
+        )
+        self.assertIsNotNone(user)
