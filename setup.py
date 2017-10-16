@@ -71,6 +71,7 @@ setup(
     install_requires=[
         'defusedxml>=0.4.1',
         'Django>=1.8',
+        'enum34;python_version > "3" and python_version < "3.4"',
         'pysaml2==4.4.0',
         ],
     extras_require=extra,
