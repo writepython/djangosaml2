@@ -45,7 +45,10 @@ from saml2.metadata import entity_descriptor
 from saml2.ident import code, decode
 from saml2.sigver import MissingKey
 from saml2.s_utils import UnsupportedBinding
-from saml2.response import StatusError, StatusAuthnFailed, SignatureError, StatusRequestDenied
+from saml2.response import (
+    StatusError, StatusAuthnFailed, SignatureError, StatusRequestDenied,
+    UnsolicitedResponse,
+)
 from saml2.validate import ResponseLifetimeExceed, ToEarly
 from saml2.xmldsig import SIG_RSA_SHA1, SIG_RSA_SHA256  # support for SHA1 is required by spec
 
@@ -286,6 +289,9 @@ def assertion_consumer_service(request,
         return fail_acs_response(request)
     except MissingKey:
         logger.exception("SAML Identity Provider is not configured correctly: certificate key is missing!")
+        return fail_acs_response(request)
+    except UnsolicitedResponse:
+        logger.exception("Received SAMLResponse when no request has been made.")
         return fail_acs_response(request)
 
     if response is None:
